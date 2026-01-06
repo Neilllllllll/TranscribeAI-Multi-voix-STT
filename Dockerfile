@@ -71,4 +71,4 @@ COPY diarization_service.py .
 EXPOSE 5001
 
 # Lancement du micro-service
-CMD ["uvicorn", "run:app", "--host", "0.0.0.0", "--port", "5001", "--workers", "1"]
+CMD ["uvicorn", "diarization_service:app", "--host", "0.0.0.0", "--port", "5001", "--workers", "1"]
