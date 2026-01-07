@@ -16,4 +16,5 @@ services:
       - ASR_MODEL_PATH=${ASR_MODEL_PATH}
       - ASR_MODEL_NAME=${ASR_MODEL_NAME}
       - HF_HOME=${HF_HOME}
+      - TORCH_HOME=${TORCH_HOME}
       - HF_TOKEN=${HF_TOKEN}

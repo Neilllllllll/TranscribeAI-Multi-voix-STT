@@ -5,10 +5,6 @@ from huggingface_hub import snapshot_download
 def ensure_models_downloaded():
     print(f"📂 Vérification du volume de modèles dans : {config.MODEL_DIR}")
     
-    # 1. On écrase le nom du dossier de cache hugging face
-    hf_cache = os.path.join(config.MODEL_DIR, "hf_cache")
-    os.environ["HF_HOME"] = hf_cache
-    
     # Liste des modèles Hugging Face requis
     hf_models = [
         "pyannote/speaker-diarization-3.1",
@@ -21,7 +17,7 @@ def ensure_models_downloaded():
         # snapshot_download ne télécharge que si les fichiers sont manquants ou corrompus
         snapshot_download(
             repo_id=model_id,
-            cache_dir=hf_cache,
+            cache_dir=config.HF_CACHE,
             token=config.HF_TOKEN if config.HF_TOKEN else None,
             local_files_only=False # Sera mis à True globalement APRÈS ce loop
         )
