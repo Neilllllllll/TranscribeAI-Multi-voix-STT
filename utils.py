@@ -3,10 +3,10 @@ import os
 from huggingface_hub import snapshot_download
 # Vérifie et télécharge les modèles si nécessaire avant le démarrage.
 def ensure_models_downloaded():
-    print(f"📂 Vérification du volume de modèles dans : {config.ASR_MODEL_PATH}")
+    print(f"📂 Vérification du volume de modèles dans : {config.MODEL_DIR}")
     
     # 1. On écrase le nom du dossier de cache hugging face
-    hf_cache = os.path.join(config.ASR_MODEL_PATH, "hf_cache")
+    hf_cache = os.path.join(config.MODEL_DIR, "hf_cache")
     os.environ["HF_HOME"] = hf_cache
     
     # Liste des modèles Hugging Face requis
