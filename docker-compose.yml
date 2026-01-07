@@ -20,3 +20,4 @@ services:
       - HF_HUB_OFFLINE=${HF_HUB_OFFLINE}
       - PYTHONHASHSEED=${PYTHONHASHSEED}
       - HF_HOME=${HF_HOME}
+      - HF_TOKEN=${HF_TOKEN}

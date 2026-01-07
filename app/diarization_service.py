@@ -1,4 +1,5 @@
 import config
+import utils
 import os
 import torch
 import functools
@@ -19,27 +20,41 @@ app = FastAPI(title="WhisperX Diarization API")
 
 @app.on_event("startup")
 async def load_models():
-    print("⏳ Chargement des modèles pour la diarization !")
     app.state.models = {}
-    print(f"⏳ Chargement du modèle {config.MODEL_NAME}...")
-    app.state.models["asr"] = whisperx.load_model(config.MODEL_NAME, config.DEVICE, compute_type=config.COMPUTE_TYPE, download_root=config.MODEL_DIR)
-    print(f"✅ Modèle {config.MODEL_NAME} prêt sur {config.DEVICE}")
+    app.state.is_processing = True
 
-    print(f"⏳ Chargement du modèle pyannote pour la diarization ")
-    app.state.models["diarize"] = DiarizationPipeline(use_auth_token=False, device=config.DEVICE)
-    print(f"✅ Modèle pyannote prêt sur {config.DEVICE}")
+    try:
+        # Vérifie si les modèles sont présents (si non les télécharges)
+        if(os.getenv("HF_TOKEN")):
+            utils.ensure_models_downloaded()
 
-    print(f"⏳ Chargement du modèle pour l'alignement ")
-    model_a, metadata = whisperx.load_align_model(
-        language_code="fr", 
-        device=config.DEVICE
-    )
-    app.state.models["align"] = {"fr": (model_a, metadata)}
-    print(f"✅ Modèle d'alignement prêt sur {config.DEVICE}")
+        # Passage en mode offline
+        os.environ["HF_HUB_OFFLINE"] = "1"
+        os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
-    print("✅ Les modèles pour la diarization ont étés chargées avec succès !")
+        print("⏳ Chargement des modèles pour la diarization !")
+        print(f"⏳ Chargement du modèle {config.MODEL_NAME}...")
+        app.state.models["asr"] = whisperx.load_model(config.MODEL_NAME, config.DEVICE, compute_type=config.COMPUTE_TYPE, download_root=config.MODEL_DIR)
+        print(f"✅ Modèle {config.MODEL_NAME} prêt sur {config.DEVICE}")
 
-    app.state.is_processing = False
+        print(f"⏳ Chargement du modèle pyannote pour la diarization ")
+        app.state.models["diarize"] = DiarizationPipeline(use_auth_token=config.HF_TOKEN, device=config.DEVICE)
+        print(f"✅ Modèle pyannote prêt sur {config.DEVICE}")
+
+        print(f"⏳ Chargement du modèle pour l'alignement ")
+        model_a, metadata = whisperx.load_align_model(
+            language_code="fr", 
+            device=config.DEVICE
+        )
+        app.state.models["align"] = {"fr": (model_a, metadata)}
+        print(f"✅ Modèle d'alignement prêt sur {config.DEVICE}")
+
+        print("✅ Les modèles pour la diarization ont étés chargées avec succès !")
+    except Exception as e:
+        print(f"Erreur au start : {e}")
+        raise e
+    finally:
+        app.state.is_processing = False
 
 @app.post("/diarize")
 async def do_diarization(audioFile: UploadFile = File(...)):

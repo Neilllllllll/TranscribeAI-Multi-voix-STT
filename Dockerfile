@@ -66,8 +66,9 @@ COPY requirements.txt .
 # Installation du reste des requirements (WhisperX, FastAPI, etc.)
 RUN pip install -r requirements.txt
 
-COPY config.py .
-COPY diarization_service.py .
+COPY app .
+
+WORKDIR /workspace/app
 
 EXPOSE 5001
 
