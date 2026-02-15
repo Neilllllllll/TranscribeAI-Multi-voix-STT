@@ -68,6 +68,8 @@ async def do_diarization(
     
     app.state.is_processing = True
 
+    print("min_speakers: " + str(min_speakers) + " max_speakers : "+ str(max_speakers))
+
     original_extension = os.path.splitext(audioFile.filename)[1]
     if not original_extension:
         original_extension = ".tmp" # repli par défaut
