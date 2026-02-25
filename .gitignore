@@ -2,9 +2,6 @@
 .venv/
 __pycache__/
 *.py[cod]
-
-# Environnement et secrets
 .env
-
-# Données locales et dossiers temporaires
 audios/
+models/*
