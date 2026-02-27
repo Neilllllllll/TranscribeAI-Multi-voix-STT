@@ -8,6 +8,7 @@ import utils
 import torch
 from models import Segment
 from dataclasses import asdict
+import uvicorn
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -42,7 +43,6 @@ async def lifespan(app: FastAPI):
 
         # Warmup de pyannote
         warmup_result_pyannote = utils.warmup_pyannote(app.state.models["pyannote"], audio_path="audios/audio_diarization_test.mp3")
-        print(f"Résultat du warmup de Pyannote : {warmup_result_pyannote}")
         if warmup_result_pyannote is not None:
             print("Pyannote préchauffé avec succès")
         else:
@@ -93,6 +93,11 @@ async def transcribe(
 
                 # Etape 4.2 : Transcription du segment (whisper)
                 transcription_segment_result = utils.transcribe_with_whisper(app.state.models["whisper"], temp_segment_path)
+
+                # On ajoute pas le segment à la liste finale si la transcription est vide
+                if transcription_segment_result.strip() == "":
+                    continue
+
             except Exception as e:
                 print(f"Erreur lors du traitement du segment numéro {merged_segments[i].segment} du locuteur {merged_segments[i].speaker} : {e}")
                 transcription_segment_result = None
@@ -110,7 +115,7 @@ async def transcribe(
 
             transcribed_segments_liste.append(transcribed_segment)
 
-        return {"segments non mergé " : [asdict(s) for s in transcribed_segments_liste]}
+        return {"segments" : [asdict(s) for s in transcribed_segments_liste]}
 
     except Exception as e:
         print(f"Erreur lors du traitement de la requête : {e}")
@@ -123,5 +128,4 @@ async def is_busy():
     return {"is_processing": app.state.is_processing}
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5001)
