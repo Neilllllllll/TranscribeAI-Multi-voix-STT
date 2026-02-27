@@ -78,7 +78,7 @@ async def transcribe(
         # Etape 3 : Diarization (pyannote)
         diarization_segment = utils.diarize_with_pyannote(app.state.models["pyannote"], temp_wav_path)
 
-        # Etape 4 : Merge les segments de parole si ils se suivent et qu'ils ont le même speaker
+        # Etape 4 : Fusionne les segments consécutifs du même speaker en un seul segment plus long
         merged_segments = utils.merge_segments(diarization_segment)
 
         transcribed_segments_liste = []

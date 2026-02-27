@@ -9,6 +9,7 @@ import torchaudio
 from pyannote.audio.pipelines.utils.hook import ProgressHook
 from models import Segment
 
+# Lance une transcription de test pour vérifier que le modèle Whisper est opérationnel
 def warmup_whisper(model, audio_path):
     try:
         temp_wav_path = convert_to_wav(audio_path)
@@ -18,6 +19,7 @@ def warmup_whisper(model, audio_path):
         transcription_result = None
     return transcription_result
 
+# Lance une diarization de test pour vérifier que le modèle Pyannote est opérationnel
 def warmup_pyannote(model, audio_path):
     try:
         diarization_result = diarize_with_pyannote(model, audio_path)
@@ -26,6 +28,7 @@ def warmup_pyannote(model, audio_path):
         diarization_result = None
     return diarization_result
 
+# Sauvegarde un fichier UploadFile dans un fichier temporaire et retourne son chemin
 def save_uploadfile_to_temp(upload: UploadFile) -> str:
     suffix = ""
     if upload.filename and "." in upload.filename:
@@ -40,7 +43,7 @@ def save_uploadfile_to_temp(upload: UploadFile) -> str:
 
     return tmp_path
 
-# Convertit n'importe quel format audio en WAV 16kHz mono, avec un filtrage pour améliorer la qualité de la transcription.
+# Convertit n'importe quel format audio en WAV 16kHz (optimal pour whisper et pyannote) mono, avec un filtrage pour améliorer la qualité de la transcription.
 def convert_to_wav(input_path):
     temp_wav = tempfile.NamedTemporaryFile(suffix=".wav", delete=False).name
     cmd = [
@@ -52,6 +55,7 @@ def convert_to_wav(input_path):
     subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return temp_wav
 
+# Extrait un segment audio d'un fichier WAV en utilisant ffmpeg
 def extract_wav_segment(input_wav, start_time, end_time):
     duration = end_time - start_time
     if duration <= 0:
@@ -73,6 +77,7 @@ def extract_wav_segment(input_wav, start_time, end_time):
     subprocess.run(cmd, check=True)
     return temp_path
 
+# Télécharge un modèle depuis Hugging Face et le sauvegarde dans le dossier spécifié
 def download_hugging_face_model(models_dir : str, hf_token : str, repo_id : str):
     local_dir = os.path.join(models_dir, repo_id.replace("/", "__"))
     os.makedirs(local_dir, exist_ok=True)
@@ -84,10 +89,12 @@ def download_hugging_face_model(models_dir : str, hf_token : str, repo_id : str)
     )
     return local_dir
 
+# Transcrit un segment audio avec le modèle Whisper et retourne le texte transcrit
 def transcribe_with_whisper(model, wav_path):
     transcription_result = model.transcribe(wav_path, language="fr", task="transcribe", fp16=True)
     return transcription_result.get("text", "")
 
+# Effectue la diarization d'un fichier audio avec le modèle Pyannote et retourne une liste de segments avec les timestamps, les speakers et les numéros de segment
 def diarize_with_pyannote(model, audio_path: str):
     waveform, sample_rate = torchaudio.load(audio_path)
     with ProgressHook() as hook:
@@ -97,9 +104,11 @@ def diarize_with_pyannote(model, audio_path: str):
     segments = []
     for i, (segment, _, speaker) in enumerate(ann.itertracks(yield_label=True), start=1):
         seg = Segment(segment = i, start = float(segment.start), end = float(segment.end), speaker = str(speaker))
-        segments.append(seg)
+        if seg.duration > 0.3:
+            segments.append(seg)
     return segments
 
+# Fusionne les segments consécutifs du même speaker en un seul segment plus long
 def merge_segments(segments_liste: list[Segment]):
     new_segments_liste = []
 
@@ -115,8 +124,8 @@ def merge_segments(segments_liste: list[Segment]):
             new_segments_liste.append(segment_temp)
             segment_temp = segments_liste[i]
         
-
     return new_segments_liste
 
+# Nettoie les ressources utilisées par les modèles
 def models_cleanup(models):
     pass

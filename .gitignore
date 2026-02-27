@@ -3,5 +3,4 @@
 __pycache__/
 *.py[cod]
 .env
-audios/
-models/*
+models/
