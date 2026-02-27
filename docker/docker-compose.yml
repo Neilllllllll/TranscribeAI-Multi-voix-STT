@@ -1,6 +1,6 @@
 services:
-  whisperx-api:
-    build: .
+  transcribe-ai-multi-voix:
+    image: transcribe-ai-multi-voix:latest
     ports:
       - "5001:5001"
     deploy:
@@ -11,10 +11,8 @@ services:
               count: 1
               capabilities: [gpu]
     volumes:
-      - ${MODELS_PATH}:/models
+      - ${MODELS_DIR}:/models
     environment:
-      - ASR_MODEL_PATH=${ASR_MODEL_PATH}
-      - ASR_MODEL_NAME=${ASR_MODEL_NAME}
-      - HF_HOME=${HF_HOME}
-      - TORCH_HOME=${TORCH_HOME}
+      - MODEL_DIR=${MODELS_DIR}
+      - MODEL_NAME=${MODEL_NAME}
       - HF_TOKEN=${HF_TOKEN}

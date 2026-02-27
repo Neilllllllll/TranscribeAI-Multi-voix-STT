@@ -2,7 +2,6 @@
 # Dockerfile: PyTorch + WhisperX pour RTX 40/50 Series
 # Optimisé pour CUDA 12.8 et architecture Blackwell (sm_100/sm_120)
 #------------------------------------------------------------
-
 FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04
 
 # Désactiver les interactions lors de l'install
@@ -44,6 +43,8 @@ RUN wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && \
     python3.11 get-pip.py && \
     rm get-pip.py
 
+RUN pip install --upgrade pip
+
 # Create virtual environment
 RUN python3.11 -m venv /opt/venv
 ENV VIRTUAL_ENV=/opt/venv
@@ -52,14 +53,6 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Upgrade pip
 RUN pip install --upgrade pip setuptools wheel
 
-# --- CONFIGURATION CUDA & FIX SEGFAULT 139 ---
-ENV CUDA_HOME=/usr/local/cuda-12.8
-ENV PATH=${CUDA_HOME}/bin:${PATH}
-
-# Le fix est ici : On force l'inclusion des libs CUDNN et CUBLAS de l'image NVIDIA
-# et on ajoute le dossier des libs Python où certaines dépendances s'installent
-ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:/usr/lib/x86_64-linux-gnu:/opt/venv/lib/python3.11/site-packages/nvidia/cudnn/lib:/opt/venv/lib/python3.11/site-packages/nvidia/cublas/lib:${LD_LIBRARY_PATH}
-
 # Copy utilities
 COPY requirements.txt .
 
@@ -67,10 +60,13 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY config.py .
+COPY models.py .
 COPY utils.py .
-COPY diarization_service.py .
+COPY main.py .
+COPY audios/audio_diarization_test.mp3 ./audios/
+COPY audios/test.flac ./audios/
 
 EXPOSE 5001
 
 # Lancement du micro-service
-CMD ["uvicorn", "diarization_service:app", "--host", "0.0.0.0", "--port", "5001", "--workers", "1"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5001", "--workers", "1"]
