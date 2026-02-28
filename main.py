@@ -114,7 +114,7 @@ async def transcribe(
             )
 
             transcribed_segments_liste.append(transcribed_segment)
-
+        # Etape 6 : Retour de la liste des segments transcrits avec les timestamps, les speakers et les numéros de segment
         return {"segments" : [asdict(s) for s in transcribed_segments_liste]}
 
     except Exception as e:
