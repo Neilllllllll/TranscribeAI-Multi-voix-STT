@@ -1,11 +1,12 @@
 # Service de diarization
 
-Ce script permet d'exposer un service de retranscription avec une segmentation des locuteurs (diarization). Il utilise les modèles de pyannote pour la diarization et whisper pour la transcription.
+Ce script permet d'exposer un service de retranscription avec une segmentation des locuteurs (diarization). Il utilise les modèles suivants : 
+- **Pyannote** pour la diarization et **Whisper** pour la transcription.
 
 ## Sommaire
 
 - [Pipeline du service](#pipeline-du-service)
-    - [Schema du pipeline de diarization](#schema-du-pipeline-de-diarization)
+    - [Schema du pipeline](#schema-du-pipeline)
     - [Technologies utilisées](#technologies-utilisées)
 - [Lancer le service](#lancer-le-service)
     - [Docker](#docker)
@@ -84,12 +85,11 @@ segments = [
 - Etape 5 : Pour chaque segment de parole identifié, on extrait le segment audio correspondant et on le transcrit avec whisper
 - Etape 6 : On retourne la liste des segments avec les timestamps, les speakers et les textes transcrits
 
-### Schema du pipeline de diarization
+### Schema du pipeline
 
-![schema du pipeline de diarization](./assets/schema_diarization_pipeline.png)
+![schema du pipeline](./assets/diarization_pipeline.png)
 
 ### Technologies utilisées
-
 - **FastAPI** : Librarie pour créer une API REST pour exposer le service de diarization
 - **Pyannote** : Pour segmenter les locuteurs dans un fichier audio
 - **Whisper** : Modèle de transcription pour transcrire des segments audio
