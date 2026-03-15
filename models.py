@@ -3,7 +3,7 @@ from typing import Optional
 
 @dataclass
 class Segment:
-    segment: int
+    segment_id: int
     start: float
     end: float
     speaker: str

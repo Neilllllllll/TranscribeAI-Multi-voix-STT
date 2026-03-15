@@ -103,7 +103,7 @@ def diarize_with_pyannote(model, audio_path: str):
     ann = diarization_result.exclusive_speaker_diarization
     segments = []
     for i, (segment, _, speaker) in enumerate(ann.itertracks(yield_label=True), start=1):
-        seg = Segment(segment = i, start = float(segment.start), end = float(segment.end), speaker = str(speaker))
+        seg = Segment(segment_id = i, start = float(segment.start), end = float(segment.end), speaker = str(speaker))
         if seg.duration > 0.3:
             segments.append(seg)
     return segments
@@ -114,6 +114,8 @@ def merge_segments(segments_liste: list[Segment]):
 
     if len(segments_liste) > 0:
         segment_temp = segments_liste[0]
+    else:
+        return new_segments_liste
 
     for i in range (1, len(segments_liste)):
         if segment_temp.same_speaker(segments_liste[i]):

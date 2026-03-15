@@ -85,7 +85,7 @@ async def transcribe(
 
         # Etape 5 : Pour chaque segment de parole identifié, on extrait le segment audio correspondant et on le transcrit avec whisper
         for i in range (0, len(merged_segments)):
-            print(f"Traitement du segment numéro {merged_segments[i].segment} du locuteur {merged_segments[i].speaker} (de {merged_segments[i].start}s à {merged_segments[i].end}s)")
+            print(f"Traitement du segment numéro {merged_segments[i].segment_id} du locuteur {merged_segments[i].speaker} (de {merged_segments[i].start}s à {merged_segments[i].end}s)")
             try:
                 # Etape 4.1 : Extraction du segment audio correspondant
                 temp_segment_path = utils.extract_wav_segment(temp_wav_path, merged_segments[i].start, merged_segments[i].end)
@@ -99,14 +99,14 @@ async def transcribe(
                     continue
 
             except Exception as e:
-                print(f"Erreur lors du traitement du segment numéro {merged_segments[i].segment} du locuteur {merged_segments[i].speaker} : {e}")
+                print(f"Erreur lors du traitement du segment numéro {merged_segments[i].segment_id} du locuteur {merged_segments[i].speaker} : {e}")
                 transcription_segment_result = None
             finally:
                 if os.path.exists(temp_segment_path):
                     os.remove(temp_segment_path)
 
             transcribed_segment = Segment (
-                segment = i, 
+                segment_id = i, 
                 start = merged_segments[i].start, 
                 end = merged_segments[i].end, 
                 speaker = merged_segments[i].speaker, 
